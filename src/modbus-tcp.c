@@ -41,7 +41,11 @@
 #endif
 
 # include <netinet/in.h>
+#ifdef ESP_PLATFORM
+# include <lwip/inet.h> // freertos lwip
+#else
 # include <netinet/ip.h>
+#endif
 # include <netinet/tcp.h>
 # include <arpa/inet.h>
 # include <netdb.h>
@@ -401,7 +405,11 @@ static int _modbus_tcp_pi_connect(modbus_t *ctx)
     rc = getaddrinfo(ctx_tcp_pi->node, ctx_tcp_pi->service, &ai_hints, &ai_list);
     if (rc != 0) {
         if (ctx->debug) {
+            #ifdef ESP_PLATFORM
+            fprintf(stderr, "Error returned by getaddrinfo: %s\n", strerror(rc));
+            #else
             fprintf(stderr, "Error returned by getaddrinfo: %s\n", gai_strerror(rc));
+            #endif
         }
         errno = ECONNREFUSED;
         return -1;
@@ -626,7 +634,11 @@ int modbus_tcp_pi_listen(modbus_t *ctx, int nb_connection)
     rc = getaddrinfo(node, service, &ai_hints, &ai_list);
     if (rc != 0) {
         if (ctx->debug) {
+            #ifdef ESP_PLATFORM
+            fprintf(stderr, "Error returned by getaddrinfo: %s\n", strerror(rc));
+            #else
             fprintf(stderr, "Error returned by getaddrinfo: %s\n", gai_strerror(rc));
+            #endif
         }
         errno = ECONNREFUSED;
         return -1;

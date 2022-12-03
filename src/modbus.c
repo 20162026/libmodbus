@@ -91,12 +91,21 @@ void _error_print(modbus_t *ctx, const char *context)
     }
 }
 
+#ifdef ESP_PLATFORM
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#endif
 static void _sleep_response_timeout(modbus_t *ctx)
 {
     /* Response timeout is always positive */
 #ifdef _WIN32
     /* usleep doesn't exist on Windows */
     Sleep((ctx->response_timeout.tv_sec * 1000) + (ctx->response_timeout.tv_usec / 1000));
+#elif ESP_PLATFORM
+    uint32_t time_ms = (ctx->response_timeout.tv_sec * 1000) + (ctx->response_timeout.tv_usec / 1000);
+    if(time_ms < 10)
+        time_ms = 10;
+    vTaskDelay(time_ms / portTICK_PERIOD_MS);
 #else
     /* usleep source code */
     struct timespec request, remaining;

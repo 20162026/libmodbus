@@ -514,7 +514,12 @@ static int _modbus_rtu_connect(modbus_t *ctx)
 
        Timeouts are ignored in canonical input mode or when the
        NDELAY option is set on the file via open or fcntl */
+       
+    #ifdef ESP_PLATFORM
+    flags = O_RDWR | O_NOCTTY | FNDELAY | O_EXCL;
+    #else
     flags = O_RDWR | O_NOCTTY | O_NDELAY | O_EXCL;
+    #endif
 #ifdef O_CLOEXEC
     flags |= O_CLOEXEC;
 #endif
